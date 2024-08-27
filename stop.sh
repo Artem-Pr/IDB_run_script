@@ -29,8 +29,12 @@ log $INFO "Running Docker containers:"
 docker ps
 
 # Stop the Docker containers
-docker-compose down
+docker compose down
 log $MAIN "Docker containers stopped."
+
+log $INFO "Removing dangling images..."
+docker image prune -f
+log $SUCCESS "Dangling images removed."
 
 log $INFO "Existed Docker images:"
 docker images

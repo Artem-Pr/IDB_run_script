@@ -22,12 +22,26 @@ MAIN=$CYAN
 PROJECT1_GIT_URL="https://github.com/Artem-Pr/IDB_Front_2.0.git"
 PROJECT2_GIT_URL="https://github.com/Artem-Pr/ImageDataBaseBackend.git"
 
+# New variable to track the build flag
+BUILD_FLAG=false
+
 # Define paths to the project directories and their corresponding branches
 PROJECT1_PATH="./IDB_Front_2.0"
 PROJECT1_BRANCH="main"
 
 PROJECT2_PATH="./ImageDataBaseBackend" # Make sure this path is correct
 PROJECT2_BRANCH="master"
+
+# Function to parse command-line arguments
+parse_args() {
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            --build) BUILD_FLAG=true ;;
+            *) echo -e "${ERROR}Unknown parameter passed: $1${NC}"; exit 1 ;;
+        esac
+        shift
+    done
+}
 
 # Function to apply color to a message
 log() {
@@ -83,6 +97,9 @@ check_for_updates() {
 
 log $MAIN "Starting the update and Docker service management process..."
 
+# Call the parse_args function with all the command-line arguments
+parse_args "$@"
+
 # Clone the repositories if necessary
 clone_if_missing "$PROJECT1_PATH" "$PROJECT1_GIT_URL"
 clone_if_missing "$PROJECT2_PATH" "$PROJECT2_GIT_URL"
@@ -111,7 +128,11 @@ fi
 
 # Start or restart the Docker services
 log $INFO "Starting or restarting the Docker services..."
-docker-compose up -d
+if [ "$BUILD_FLAG" = true ]; then
+    docker compose up -d --build
+else
+    docker compose up -d
+fi
 log $SUCCESS "Docker services are now running."
 
 log $MAIN "Update and Docker service management process completed."

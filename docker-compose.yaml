@@ -1,25 +1,24 @@
-version: "3.9"
 # This file should be placed in a directory with 2 folders: IDB_Front_2.0 and ImageDataBaseBackend (should be outside of the frontend folder)
 
 services:
-  idb-front:
-    build: 
-      context: IDB_Front_2.0/
-      dockerfile: Dockerfile
-      args:
-        HOST_APP_PORT: ${HOST_APP_PORT}
-        LOCAL_BACKEND_PORT: ${LOCAL_BACKEND_PORT}
-        LOCAL_BACKEND_WEB_SOCKET_PORT: ${LOCAL_BACKEND_WEB_SOCKET_PORT}
-    environment:
-      HOST_APP_PORT: ${HOST_APP_PORT}
-      LOCAL_BACKEND_PORT: ${LOCAL_BACKEND_PORT}
-      LOCAL_BACKEND_WEB_SOCKET_PORT: ${LOCAL_BACKEND_WEB_SOCKET_PORT}
-    container_name: idb-front-2.0
-    ports:
-      - "${HOST_APP_PORT}:3000"
-    restart: unless-stopped
+  # idb-front:
+  #   build: 
+  #     context: IDB_Front_2.0/
+  #     dockerfile: Dockerfile
+  #     args:
+  #       HOST_APP_PORT: ${HOST_APP_PORT}
+  #       LOCAL_BACKEND_PORT: ${LOCAL_BACKEND_PORT}
+  #       LOCAL_BACKEND_WEB_SOCKET_PORT: ${LOCAL_BACKEND_WEB_SOCKET_PORT}
+  #   environment:
+  #     HOST_APP_PORT: ${HOST_APP_PORT}
+  #     LOCAL_BACKEND_PORT: ${LOCAL_BACKEND_PORT}
+  #     LOCAL_BACKEND_WEB_SOCKET_PORT: ${LOCAL_BACKEND_WEB_SOCKET_PORT}
+  #   container_name: idb-front-2.0
+  #   ports:
+  #     - "${HOST_APP_PORT}:3000"
+  #   restart: unless-stopped
   image_db_backend:
-    build: ImageDataBaseBackend/
+    build: ImageDataBaseBackend
     container_name: IDB_backend
     ports:
       - "${LOCAL_BACKEND_PORT_EXTERNAL}:${LOCAL_BACKEND_PORT}"
@@ -41,8 +40,14 @@ services:
 
       # - /Users/artempriadkin/Documents/IDBase/filesVolume/main:/app/dataBase/main
       # - /Users/artempriadkin/Documents/IDBase/filesVolume/games:/app/dataBase/games
+
+
+
       - /Users/artempriadkin/Documents/IDBase/filesVolume:/app/dataBase
       - /Users/artempriadkin/Documents/IDBase/previews:/app/previews
+
+      # - /Users/artempriadkin/Development/test-data/volumes:/app/dataBase
+      # - /Users/artempriadkin/Development/test-data/previews:/app/previews
     restart: unless-stopped
 
   mongo:
@@ -53,7 +58,19 @@ services:
       # - /Volumes/Seagate 2TB/Yandex.Disk.localized/IDBase/mongodb:/data/db
       # - /Volumes/Transcend V/Yandex.Disk.localized/IDBase/mongodb:/data/db
       # - /Users/artempriadkin/Documents/Yandex.Disk.localized/IDBase/mongodb:/data/db
+
+
       - /Users/artempriadkin/Documents/IDBase/mongodb:/data/db
+      # - /Users/artempriadkin/Development/test-data/mongo:/data/db
     ports:
       - "27017:27017"
     restart: unless-stopped
+
+  # redis:
+  #   image: redis:7.2
+  #   container_name: IDB_redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - /Users/artempriadkin/Development/test-data/redis:/data
+  #   restart: unless-stopped

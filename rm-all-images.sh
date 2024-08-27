@@ -36,3 +36,6 @@ docker images
 log $INFO "Removing all Docker images..."
 docker rmi $(docker images -aq) --force
 log $SUCCESS "All Docker images removed."
+
+log $INFO "Check existed Docker images:"
+docker images
