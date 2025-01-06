@@ -101,16 +101,16 @@ log $MAIN "Starting the update and Docker service management process..."
 parse_args "$@"
 
 # Clone the repositories if necessary
-clone_if_missing "$PROJECT1_PATH" "$PROJECT1_GIT_URL"
+# clone_if_missing "$PROJECT1_PATH" "$PROJECT1_GIT_URL"
 clone_if_missing "$PROJECT2_PATH" "$PROJECT2_GIT_URL"
 
 # Assume no updates are available initially
 updates_available=false
 
 # Check each project for updates
-if check_for_updates "$PROJECT1_PATH" "$PROJECT1_BRANCH"; then
-    updates_available=true
-fi
+# if check_for_updates "$PROJECT1_PATH" "$PROJECT1_BRANCH"; then
+#     updates_available=true
+# fi
 if check_for_updates "$PROJECT2_PATH" "$PROJECT2_BRANCH"; then
     updates_available=true
 fi
