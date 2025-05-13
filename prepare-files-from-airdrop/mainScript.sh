@@ -4,7 +4,11 @@
 # To run script use this command ./mainScript.sh /path/to/folder
 
 # Default folder variable (used if no folder is provided as an argument)
-default_folder="/Users/artempriadkin/Development/test-data/с телефона Артема 2" # Replace this with your desired folder path
+# default_folder="/Volumes/Lexar_SL500/MEGA_sync/test" # Replace this with your desired folder path
+default_folder="/Users/artempriadkin/Downloads"
+# default_folder="/Volumes/Lexar_SL500/MEGA_sync/SSD/с телефона Артема 2"
+# default_folder="/Volumes/Lexar_SL500/MEGA_sync/с олиного телефона"
+# default_folder="/Volumes/Lexar_SL500/MEGA_sync/с телефона Артема"
 
 # Folder to process, either provided as an argument or defaults to $default_folder
 folder="${1:-$default_folder}"
@@ -12,9 +16,10 @@ folder="${1:-$default_folder}"
 # Array of scripts to run (use absolute or relative paths)
 scripts_to_run=(
     "./copyFilesFromSubfoldersToCurrentDir.sh"
-    "./convertToMp4.sh"
-    "./moveExifToMp4.sh"
+    # "./convertToMp4.sh"
+    # "./moveExifToMp4.sh"
     "./cleanFiles.sh"
+    "./renameEditedFiles.sh"
 )
 
 # Define color variables

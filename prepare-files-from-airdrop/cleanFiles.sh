@@ -10,7 +10,12 @@ default_folder="/Users/artempriadkin/Downloads/1" # Replace this with your desir
 folder="${1:-$default_folder}"
 
 # Specify the extensions to delete
-extensionsToDelete=("aae" "avi" "mov" "mp4_original")
+extensionsToDelete=(
+    "aae"
+    # "avi"
+    # "mov"
+    # "mp4_original"
+)
 
 # Define color variables
 RED="\033[0;31m"
