@@ -1,17 +1,16 @@
 #!/bin/bash
 
 # Make sure you got permission by running "chmod +x moveExifToMp4.sh" before executing the script.
-# To run script use this command ./moveExifToMp4.sh /path/to/your/folder [filename_without_extension]
+# To run script use this command ./moveExifToMp4.sh /path/to/your/folder [filename_with_extension]
 # If filename is provided, only that file will be processed instead of all files in the folder.
 
 # Default folder variable (in case no folder is provided as an argument)
-default_folder="/Volumes/Lexar_SL500/MEGA_sync/с олиного телефона" # Replace this with your desired folder path or leave as "<absolute_path_to_folder>"
-
+default_folder="/Users/artempriadkin/Downloads" # Replace this with your desired folder path or leave as "<absolute_path_to_folder>"
+default_filename=""
 # Folder to process, either provided as an argument or defaults to $default_folder
 folder="${1:-$default_folder}"
-
-# Optional filename (without extension) to process only a specific file
-filename="$2"
+# Optional filename (with extension) to process only a specific file
+filename="${2:-$default_filename}"
 
 # Define color variables
 RED="\033[0;31m"
@@ -59,27 +58,39 @@ processed_files=0
 process_file() {
     local source_file="$1"
     local filename_without_ext="${source_file%.*}"
-    local target_file="${filename_without_ext}.mp4"
+    local mp4_files_found=0
     
-    # Check for MP4 file with case insensitivity
-    if [ ! -f "$target_file" ] && [ ! -f "${filename_without_ext}.MP4" ]; then
-        log $INFO "Corresponding MP4 file not found for: $source_file, skipping."
-        return
-    fi
+    log $MAIN "Looking for MP4 files that start with: $filename_without_ext"
     
-    # Use the actual MP4 file that exists (preserving case)
-    if [ ! -f "$target_file" ] && [ -f "${filename_without_ext}.MP4" ]; then
-        target_file="${filename_without_ext}.MP4"
-    fi
+    # Find all MP4 files that start with the same name (case-insensitive)
+    # This will match files like: 123.mp4, 123_prefix.mp4, 123_anotherPrefix.mp4, etc.
+    for mp4_file in *.[Mm][Pp][44]; do
+        [ -f "$mp4_file" ] || continue  # Skip if not a file
+        
+        # Get the filename without extension
+        local mp4_filename_without_ext="${mp4_file%.*}"
+        
+        # Check if this MP4 file starts with the same name as the source file
+        # Using case-insensitive comparison
+        if [[ "$(echo "$mp4_filename_without_ext" | tr '[:upper:]' '[:lower:]')" == "$(echo "$filename_without_ext" | tr '[:upper:]' '[:lower:]')"* ]]; then
+            log $MAIN "Found matching MP4 file: $mp4_file"
+            log $MAIN "Copying EXIF data from: $source_file to $mp4_file"
+            
+            # Run exiftool to move the EXIF data
+            if exiftool -TagsFromFile "$source_file" -All:All -extractEmbedded -overwrite_original "$mp4_file"; then
+                log $SUCCESS "Successfully moved EXIF data from $source_file to $mp4_file"
+                processed_files=$((processed_files + 1))
+                mp4_files_found=$((mp4_files_found + 1))
+            else
+                log $ERROR "Failed to move EXIF data from $source_file to $mp4_file"
+            fi
+        fi
+    done
     
-    log $MAIN "Copying EXIF data from: $source_file to $target_file"
-    
-    # Run exiftool to move the EXIF data
-    if exiftool -TagsFromFile "$source_file" -extractEmbedded "$target_file"; then
-        log $SUCCESS "Successfully moved EXIF data from $source_file to $target_file"
-        processed_files=$((processed_files + 1))
+    if [ $mp4_files_found -eq 0 ]; then
+        log $INFO "No matching MP4 files found for: $source_file, skipping."
     else
-        log $ERROR "Failed to move EXIF data from $source_file to $target_file"
+        log $SUCCESS "Processed $mp4_files_found MP4 file(s) for: $source_file"
     fi
 }
 
@@ -87,23 +98,22 @@ process_file() {
 if [ -n "$filename" ]; then
     log $INFO "Processing only file: $filename"
     
-    # Check for both .mov and .avi extensions (case-insensitive)
-    if [ -f "${filename}.mov" ] || [ -f "${filename}.MOV" ]; then
-        # Use the actual file extension that exists (preserving case)
-        if [ -f "${filename}.mov" ]; then
-            process_file "${filename}.mov"
-        else
-            process_file "${filename}.MOV"
-        fi
-    elif [ -f "${filename}.avi" ] || [ -f "${filename}.AVI" ]; then
-        # Use the actual file extension that exists (preserving case)
-        if [ -f "${filename}.avi" ]; then
-            process_file "${filename}.avi"
-        else
-            process_file "${filename}.AVI"
-        fi
+    # Check if the file exists with the provided extension
+    if [ -f "$filename" ]; then
+        # Extract the file extension to validate it's a supported format
+        file_extension="${filename##*.}"
+        # Convert to lowercase for case-insensitive comparison (macOS compatible)
+        file_extension_lower=$(echo "$file_extension" | tr '[:upper:]' '[:lower:]')
+        case "$file_extension_lower" in
+            mov|avi)
+                process_file "$filename"
+                ;;
+            *)
+                log $ERROR "Unsupported file extension: $file_extension. Only .mov and .avi files are supported."
+                ;;
+        esac
     else
-        log $ERROR "File not found: $filename.mov or $filename.avi"
+        log $ERROR "File not found: $filename"
     fi
 else
     # Process all .mov and .avi files (case-insensitive)
